@@ -338,6 +338,29 @@ const makeAuction = async (req, res) => {
         const { name, description, location, openingPrice, buyNowPrice, minimumBid, start, end, category } = req.body
         const images = req.files
 
+        const user = await prisma.user.findFirst({
+            where: {
+                id: userId
+            },
+            include: {
+                kycs: {
+                    orderBy: {
+                        createdAt: 'desc'
+                    },
+                    take: 1
+                }
+            }
+        })
+
+        if (!user) {
+            return res.status(404).json({ status: 404, message: "User not found" })
+        }
+
+        const kyc = user.kycs?.[0]
+        if (!kyc || kyc.status !== "Accepted") {
+            return res.status(400).json({ status: 400, message: "KYC not verified" })
+        }
+
         if (!name || !description || !location || !openingPrice || !buyNowPrice || !minimumBid || !start || !end || !category) {
             return res.status(400).json({ status: 400, message: "All fields are required" })
         }
