@@ -274,13 +274,14 @@ const changePassword = async (req, res) => {
 const verifyKyc = async (req, res) => {
     try {
 
+        const userId = req.decoded.id
         const file = req.file
         if (!file) return res.status(400).json({ status: 400, message: "Image must be uploaded" });
         const kycUrl = file.path
 
         const checkCurrKyc = await prisma.user.findFirst({
             where: {
-                id: req.decoded.id
+                id: userId
             },
             select: {
                 kycs: {
@@ -336,12 +337,21 @@ const verifyKyc = async (req, res) => {
             // SIMPAN KE DATABASE (Status: PENDING)
             // await db.users.update({ status: 'PENDING_KYC', kycUrl: kycUrl ... })
 
+            const created = await prisma.kyc.create({
+                data: {
+                    image: kycUrl,
+                    status: "Pending",
+                    userId: userId
+                }
+            })
+
             return res.json({
                 status: 200,
                 message: "KYC Accepted, waiting for admin verification",
                 data: {
                     kycUrl,
-                    isDetected: true
+                    isDetected: true,
+                    ...created
                 }
             });
         } else {
@@ -358,12 +368,8 @@ const verifyKyc = async (req, res) => {
         // Fallback: Jika OCR error/timeout, loloskan saja biar admin yang cek
         // Ini biar gak ganggu flow user saat demo
         return res.json({
-            status: 200,
-            message: "KYC Accepted, waiting for admin verification",
-            data: {
-                kycUrl,
-                isDetected: true
-            }
+            status: 500,
+            message: "Internal Server Error",
         });
     }
 }
