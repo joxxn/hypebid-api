@@ -295,7 +295,7 @@ const verifyKyc = async (req, res) => {
 
         const currKyc = checkCurrKyc?.kycs?.[0] || null
 
-        if (currKyc?.status === 'PENDING') {
+        if (currKyc?.status === 'Pending') {
             return res.status(400).json({ status: 400, message: 'You have a pending KYC' })
         }
 
