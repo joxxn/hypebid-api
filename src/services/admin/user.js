@@ -9,6 +9,11 @@ const getAllUsers = async (req, res) => {
                 role: "User"
             },
             include: {
+                kycs: {
+                    orderBy: {
+                        createdAt: "desc"
+                    }
+                },
                 auctions: {
                     orderBy: {
                         createdAt: "desc"
@@ -26,6 +31,7 @@ const getAllUsers = async (req, res) => {
         });
 
         for (const user of users) {
+            const kyc = user.kycs[0] || null
             for (const transaction of user.transactions) {
                 const expiredTime = new Date(transaction.createdAt)
                 expiredTime.setDate(expiredTime.getDate() + 1)
@@ -48,6 +54,11 @@ const getUser = async (req, res) => {
                 id
             },
             include: {
+                kycs: {
+                    orderBy: {
+                        createdAt: "desc"
+                    }
+                },
                 auctions: {
                     orderBy: {
                         createdAt: "desc"
@@ -82,9 +93,66 @@ const getUser = async (req, res) => {
             }
         }
 
+        user.kyc = user.kycs[0] || null
+
         return res.status(200).json({ status: 200, message: "Success", data: user })
     } catch (error) {
         res.status(500).json({ status: 500, message: "Internal Server Error" })
+    }
+}
+
+const answerKycUser = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { status } = req.body
+        if (!status) {
+            return res.status(400).json({ status: 400, message: "Status is required" })
+        }
+        if (status != "Accepted" && status != "Rejected") {
+            return res.status(400).json({ status: 400, message: "Status must be Accepted or Rejected" })
+        }
+        const user = await prisma.user.findFirst({
+            where: {
+                id
+            },
+            include: {
+                kycs: {
+                    orderBy: {
+                        createdAt: "desc"
+                    },
+                    take: 1
+                }
+            }
+        })
+        if (!user) {
+            return res.status(404).json({ status: 404, message: "User not found" })
+        }
+        if (user.kycs.length === 0) {
+            return res.status(404).json({ status: 404, message: "No KYC data found" })
+        }
+        const kyc = user.kycs[0]
+        if (kyc.status === "Accepted") {
+            return res.status(400).json({ status: 400, message: "KYC already accepted" })
+        }
+        if (kyc.status === "Rejected") {
+            return res.status(400).json({ status: 400, message: "KYC already rejected" })
+        }
+        const updatedUser = await prisma.user.update({
+            where: {
+                id
+            },
+            data: {
+                kycs: {
+                    update: {
+                        status
+                    }
+                }
+            }
+        })
+        return res.status(200).json({ status: 200, message: "Success", data: updatedUser })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ status: 500, message: "Internal Server Error" })
     }
 }
 
@@ -120,5 +188,6 @@ const setUserStatus = async (req, res) => {
 router.get("/", getAllUsers)
 router.get("/:id", getUser)
 router.patch("/:id", setUserStatus)
+router.patch("/:id/kyc", answerKycUser)
 
 export default router

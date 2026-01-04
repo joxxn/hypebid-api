@@ -84,6 +84,31 @@ const biddingAuction = async (req, res) => {
             return res.status(400).json({ status: 400, message: "Amount must be greater than 0" })
         }
 
+        const checkUser = await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
+            select: {
+                kycs: {
+                    orderBy: {
+                        createdAt: 'desc'
+                    }
+                }
+            }
+        })
+        if (!checkUser) {
+            return res.status(404).json({ status: 404, message: 'User not found!' })
+        }
+        if (checkUser.kycs.length === 0) {
+            return res.status(404).json({ status: 404, message: 'No KYC data found' })
+        }
+        if (checkUser.kycs[0].status === 'Pending') {
+            return res.status(200).json({ status: 200, message: 'KYC Verification is pending', data: checkUser.kycs[0] })
+        }
+        if (checkUser.kycs[0].status === 'Rejected') {
+            return res.status(200).json({ status: 200, message: 'KYC Verification is rejected', data: checkUser.kycs[0] })
+        }
+
         const auction = await prisma.auction.findUnique({
             where: {
                 id

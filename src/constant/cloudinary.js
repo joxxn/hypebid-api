@@ -8,3 +8,4 @@ export const CLOUDINARY_PARENT = 'indekos'
 export const CLOUDINARY_PROFILE = `${CLOUDINARY_PARENT}/profile`
 export const CLOUDINARY_AUCTION = `${CLOUDINARY_PARENT}/auction`
 export const CLOUDINARY_PANORAMA = `${CLOUDINARY_PARENT}/panorama`
+export const CLOUDINARY_KYC = `${CLOUDINARY_PARENT}/kyc`

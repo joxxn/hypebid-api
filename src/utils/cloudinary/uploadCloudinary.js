@@ -1,7 +1,7 @@
 import cloudinary from '../../config/cloudinary.js';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { CLOUDINARY_PROFILE, CLOUDINARY_AUCTION, CLOUDINARY_PANORAMA } from '../../constant/cloudinary.js';
+import { CLOUDINARY_PROFILE, CLOUDINARY_AUCTION, CLOUDINARY_PANORAMA, CLOUDINARY_KYC } from '../../constant/cloudinary.js';
 import randomCharacter from '../randomCharacter.js';
 
 const getFolder = (target) => {
@@ -12,6 +12,8 @@ const getFolder = (target) => {
             return CLOUDINARY_AUCTION;
         case 'panorama':
             return CLOUDINARY_PANORAMA;
+        case 'kyc':
+            return CLOUDINARY_KYC;
         default:
             throw new Error('Target not found');
     }
