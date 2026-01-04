@@ -278,6 +278,26 @@ const verifyKyc = async (req, res) => {
         if (!file) return res.status(400).json({ status: 400, message: "Image must be uploaded" });
         const kycUrl = file.path
 
+        const checkCurrKyc = await prisma.user.findFirst({
+            where: {
+                id: req.decoded.id
+            },
+            select: {
+                kycs: {
+                    orderBy: {
+                        createdAt: 'desc'
+                    },
+                    take: 1
+                }
+            }
+        })
+
+        const currKyc = checkCurrKyc?.kycs?.[0] || null
+
+        if (currKyc?.status === 'PENDING') {
+            return res.status(400).json({ status: 400, message: 'You have a pending KYC' })
+        }
+
 
         let processedUrl = kycUrl;
 
