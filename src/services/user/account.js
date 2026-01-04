@@ -299,6 +299,10 @@ const verifyKyc = async (req, res) => {
             return res.status(400).json({ status: 400, message: 'You have a pending KYC' })
         }
 
+        if (currKyc?.status === 'Approved') {
+            return res.status(400).json({ status: 400, message: 'You have an approved KYC' })
+        }
+
 
         let processedUrl = kycUrl;
 

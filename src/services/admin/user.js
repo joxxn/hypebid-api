@@ -32,6 +32,7 @@ const getAllUsers = async (req, res) => {
 
         for (const user of users) {
             const kyc = user.kycs[0] || null
+            user.kyc = kyc
             for (const transaction of user.transactions) {
                 const expiredTime = new Date(transaction.createdAt)
                 expiredTime.setDate(expiredTime.getDate() + 1)
