@@ -137,16 +137,12 @@ const answerKycUser = async (req, res) => {
         if (kyc.status === "Rejected") {
             return res.status(400).json({ status: 400, message: "KYC already rejected" })
         }
-        const updatedUser = await prisma.user.update({
+        const updatedKyc = await prisma.kyc.update({
             where: {
-                id
+                id: kyc.id
             },
             data: {
-                kycs: {
-                    update: {
-                        status
-                    }
-                }
+                status: status
             }
         })
         return res.status(200).json({ status: 200, message: "Success", data: updatedUser })
