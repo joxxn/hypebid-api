@@ -145,7 +145,7 @@ const answerKycUser = async (req, res) => {
                 status: status
             }
         })
-        return res.status(200).json({ status: 200, message: "Success", data: updatedUser })
+        return res.status(200).json({ status: 200, message: "Success", data: updatedKyc })
     } catch (error) {
         console.log(error)
         return res.status(500).json({ status: 500, message: "Internal Server Error" })
