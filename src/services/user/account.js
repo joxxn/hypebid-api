@@ -397,7 +397,7 @@ const checkKyc = async (req, res) => {
             return res.status(404).json({ status: 404, message: 'There is no data' })
         }
         if (check.kycs.length === 0) {
-            return res.status(404).json({ status: 404, message: 'No KYC data found' })
+            return res.status(200).json({ status: 200, message: 'No KYC data found' })
         }
         if (check.kycs[0].status === 'Pending') {
             return res.status(200).json({ status: 200, message: 'KYC Verification is pending', data: check.kycs[0] })
